@@ -1,0 +1,15 @@
+name: kartomat
+description: Profesjonalny portfel kart lojalnosciowych.
+version: 1.0.0+1
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  screen_brightness: ^1.0.1
+  barcode_widget: ^2.0.4
+  mobile_scanner: ^5.1.1
+
+flutter:
+  uses-material-design: true
