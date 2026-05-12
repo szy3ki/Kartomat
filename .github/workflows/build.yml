@@ -12,21 +12,25 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Tworzenie szkieletu projektu
+      - name: Tworzenie i naprawa projektu
         run: |
+          # Czyścimy śmieci i tworzymy czysty szkielet projektu
+          rm -rf android
           flutter create --project-name=kartomat . --overwrite
-          # Ustawienie uprawnień aparatu w AndroidManifest.xml
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.CAMERA" />' android/app/src/main/AndroidManifest.xml
-          # Zwiększenie minSDK do 21 (wymagane przez biblioteki)
+          
+          # Konfiguracja uprawnień i wersji (bez tego budowanie pada)
           sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' android/app/build.gradle
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.CAMERA" />' android/app/src/main/AndroidManifest.xml
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.WRITE_SETTINGS" />' android/app/src/main/AndroidManifest.xml
 
-      - name: Budowanie APK
-        run: |
-          flutter pub get
-          flutter build apk --release --split-per-abi
+      - name: Pobieranie bibliotek
+        run: flutter pub get
 
-      - name: Udostępnienie pliku APK
+      - name: Kompilacja APK
+        run: flutter build apk --release --split-per-abi
+
+      - name: Wysyłanie gotowego pliku
         uses: actions/upload-artifact@v3
         with:
-          name: Kartomat-Gotowa-Apka
+          name: Kartomat-Instalka
           path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
