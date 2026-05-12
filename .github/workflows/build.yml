@@ -1,0 +1,32 @@
+name: Zbuduj Kartomat APK
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Instalacja Fluttera
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Tworzenie szkieletu projektu
+        run: |
+          flutter create --project-name=kartomat . --overwrite
+          # Ustawienie uprawnień aparatu w AndroidManifest.xml
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.CAMERA" />' android/app/src/main/AndroidManifest.xml
+          # Zwiększenie minSDK do 21 (wymagane przez biblioteki)
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' android/app/build.gradle
+
+      - name: Budowanie APK
+        run: |
+          flutter pub get
+          flutter build apk --release --split-per-abi
+
+      - name: Udostępnienie pliku APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: Kartomat-Gotowa-Apka
+          path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
