@@ -6,31 +6,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
-      - name: Instalacja Fluttera
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-
-      - name: Tworzenie i naprawa projektu
+      
+      - name: Generowanie struktury projektu
         run: |
-          # Czyścimy śmieci i tworzymy czysty szkielet projektu
-          rm -rf android
+          # Wymuszamy stworzenie brakujących plików Androida
           flutter create --project-name=kartomat . --overwrite
-          
-          # Konfiguracja uprawnień i wersji (bez tego budowanie pada)
+          # Podbijamy minSDK (wymagane przez bibliotekę jasności)
           sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' android/app/build.gradle
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.CAMERA" />' android/app/src/main/AndroidManifest.xml
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.WRITE_SETTINGS" />' android/app/src/main/AndroidManifest.xml
-
-      - name: Pobieranie bibliotek
-        run: flutter pub get
-
-      - name: Kompilacja APK
-        run: flutter build apk --release --split-per-abi
-
-      - name: Wysyłanie gotowego pliku
+          
+      - name: Build
+        run: |
+          flutter pub get
+          flutter build apk --release --split-per-abi
+          
+      - name: Upload
         uses: actions/upload-artifact@v3
         with:
-          name: Kartomat-Instalka
+          name: Kartomat-Gotowy
           path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
